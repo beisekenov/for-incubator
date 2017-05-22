@@ -1,0 +1,83 @@
+#define trigPinLeft 13
+#define echoPinLeft 11
+
+#define trigPinRight 9
+#define echoPinRight 7
+
+//long durationLeft;
+//long durationRight;
+
+void setup() {
+ Serial.begin (9600); // set the serial monitor up with 9600 baud rate
+
+// Serial.println('Lets get it started');
+ 
+ //Setting Left pin
+ pinMode(trigPinLeft, OUTPUT);
+ pinMode(echoPinLeft, INPUT);
+
+/* //Setting Right pin
+ pinMode(trigPinRight, OUTPUT);
+ pinMode(echoPinRight, INPUT);*/
+ 
+}
+void loop() {
+ long durationLeft, durationRight, distanceLeft, distanceRight;
+
+ //Left sensor
+ 
+ digitalWrite(trigPinLeft, LOW); // making the signal low
+ delayMicroseconds(2); // waiting for 2 microseconds
+ digitalWrite(trigPinLeft, HIGH); // sending the signal to the sonic to trigger it
+ delayMicroseconds(10); // keeping the output as HIGH to create the 10 microsecond pulse for triger
+ digitalWrite(trigPinLeft, LOW); // setting output back to LOW, now the triger pulse is generated and accordingly
+ // a 40 KHz signal will be sent out of the transmitter
+ durationLeft = pulseIn2(echoPinLeft, HIGH); // get the calculated duration from the function
+ distanceLeft = (durationLeft/2) / 29; // considers the speed of sound [(343.2m/s)/10000]
+ if (distanceLeft >= 100000 || distanceLeft <= 0){
+ Serial.println("Out of range");
+ } else {
+ Serial.print(distanceLeft);
+ Serial.println(" cm to left");
+ }
+
+/*//Right sensor
+
+ digitalWrite(trigPinRight, LOW); // making the signal low
+ delayMicroseconds(2); // waiting for 2 microseconds
+ digitalWrite(trigPinRight, HIGH); // sending the signal to the sonic to trigger it
+ delayMicroseconds(10); // keeping the output as HIGH to create the 10 microsecond pulse for triger
+ digitalWrite(trigPinRight, LOW); // setting output back to LOW, now the triger pulse is generated and accordingly
+ // a 40 KHz signal will be sent out of the transmitter
+ durationRight = pulseIn2(echoPinRight, HIGH); // get the calculated duration from the function
+ distanceRight = (durationRight/2) / 29; // considers the speed of sound [(343.2m/s)/10000]
+ if (distanceRight >= 100000 || distanceRight <= 0){
+ Serial.println("Out of range");
+ } else {
+ Serial.print(distanceRight);
+ Serial.println(" cm to right");
+ }*/
+ delay(500);
+}
+
+ unsigned long pulseIn2(uint8_t pin, uint8_t state) {
+ unsigned long pulseWidth = 0;
+ unsigned long loopCount = 0;
+ unsigned long loopMax = 5000000;
+ // While the pin is *not* in the target state we make sure the timeout hasn't been reached.
+ while ((digitalRead(pin)) != state) {
+ if (loopCount++ == loopMax) {
+ return 0;
+ }
+ }
+ // When the pin *is* in the target state we bump the counter while still keeping track of the timeout.
+ while ((digitalRead(pin)) == state) {
+ if (loopCount++ == loopMax) {
+ return 0;
+ }
+ pulseWidth++;
+ }
+ // Return the pulse time in microseconds
+ return pulseWidth*5*2.36/2; //the coefficient here (5*2.36) is the value to be tweaked
+// pulse width may vary from device to device
+}
